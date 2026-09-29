@@ -1,0 +1,17 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+.cache/
+.state/
+.auth/
+results/
+build/
+dist/
+*.pem
+*.cer
+*.pfx
+*.p12
+*accessKeys.csv
+*.env
+.env

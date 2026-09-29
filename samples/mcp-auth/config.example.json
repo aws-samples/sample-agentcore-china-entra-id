@@ -1,0 +1,14 @@
+{
+  "account_id": "REPLACE_WITH_CHINA_ACCOUNT",
+  "region": "cn-north-1",
+  "tenant_id": "REPLACE_WITH_ENTRA_CHINA_TENANT",
+  "api_app_id": "REPLACE_WITH_API_APPLICATION_ID",
+  "client_app_id": "REPLACE_WITH_PUBLIC_TEST_CLIENT_ID",
+  "authority_host": "https://login.partner.microsoftonline.cn",
+  "scope": "agent.invoke",
+  "bucket": "REPLACE_WITH_PRIVATE_DEPLOYMENT_BUCKET",
+  "bucket_project_tag": "REPLACE_WITH_BUCKET_PROJECT_TAG",
+  "project_tag": "agentcore-cn-mcp-auth-reference",
+  "runtime_prefix": "entra_cn_mcp_sample",
+  "gateway_prefix": "entra-cn-mcp-sample"
+}

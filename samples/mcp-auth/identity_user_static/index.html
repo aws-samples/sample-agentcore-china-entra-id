@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>企业身份 · AgentCore 中国区实践</title>
+  <link rel="stylesheet" href="{{BASE}}/app.css">
+  <script src="{{BASE}}/app.js" defer></script>
+</head>
+<body>
+<header><a class="wordmark" href="{{BASE}}/"><span class="mark">a<span>c</span></span>AGENTCORE <small>中国区实践</small></a><span class="edition">IDENTITY LAB / 03</span></header>
+<main>
+  <div class="eyebrow"><span class="dot"></span>世纪互联 Microsoft Entra ID · 北京区域</div>
+  <section class="intro"><div><h1>一次登录，<br>让授权跟随用户。</h1><p class="lede">以企业员工身份登录，再授权应用读取自己的基本信息。通过这条真实链路，了解 AgentCore Identity 如何连接企业身份与下游工具。</p></div><aside><span class="aside-label">本次验证</span><p>登录的人<br>与工具访问的人<br><strong>是否为同一人？</strong></p><span class="aside-foot">China Graph /me</span></aside></section>
+  <div class="flow"><span>企业浏览器</span><b>→</b><span>Entra ID</span><b>→</b><span>Runtime MCP</span><b>→</b><span class="highlight">Identity</span><b>→</b><span>China Graph</span></div>
+  <section class="workspace" aria-label="登录与授权步骤">
+    <div class="section-heading"><h2>开始本次验证</h2><span id="session-label">正在连接…</span></div>
+    <ol class="steps">
+      <li id="step-login"><span class="number">01</span><div class="step-copy"><h3>使用企业账户登录</h3><p>使用世纪互联 Entra ID 企业账户登录，并满足本次登录适用的组织策略。</p></div><a class="button primary" id="login" href="{{BASE}}/login">企业登录 <span>↗</span></a></li>
+      <li id="step-auth"><span class="number">02</span><div class="step-copy"><h3>授权访问自己的信息</h3><p>进入 Entra 授权页面，允许本应用读取你的基本个人信息。</p></div><button id="authorize" disabled>开始授权 <span>→</span></button><a id="continue" class="button primary hidden" href="{{BASE}}/continue">继续至 Entra <span>↗</span></a></li>
+      <li id="step-check"><span class="number">03</span><div class="step-copy"><h3>执行工具并查看结果</h3><p>调用 Runtime 中的 MCP 工具，通过原生 Identity 访问 China Graph。</p></div><button id="run" disabled>运行验证 <span>→</span></button></li>
+    </ol>
+    <div class="status-line" role="status" aria-live="polite"><span id="status-dot" class="dot"></span><span id="status">正在读取会话状态。</span></div>
+  </section>
+  <section id="result-panel" class="result hidden">
+    <div class="section-heading"><h2 id="result-title">本次结果</h2><a id="download" href="{{BASE}}/result">下载结果 JSON ↓</a></div>
+    <div class="metrics"><div><span>Graph 响应</span><strong id="graph-status">—</strong></div><div><span>用户一致性</span><strong id="user-match">—</strong></div><div><span>原生 Identity</span><strong id="native-used">—</strong></div></div>
+    <details><summary>查看请求证据</summary><pre id="evidence"></pre></details>
+  </section>
+  <section class="notes"><div><h3>读什么，记录什么</h3><p>仅请求 User.Read，并查询当前用户的标识进行一致性比较。结果文件保存状态、请求编号和比较结果，不保存姓名、邮箱、用户标识或令牌值。</p></div><div><h3>用于哪类场景</h3><p>员工使用智能助手访问需要个人授权的下游服务。此处使用 Graph 做最小验证，展示独立用户授权的完整过程。</p></div></section>
+</main>
+<footer><span>参考实现 · AgentCore Runtime + Identity USER_FEDERATION</span><button id="logout" class="text-button hidden">结束本次会话</button><span>示例页面，非生产应用</span></footer>
+</body></html>

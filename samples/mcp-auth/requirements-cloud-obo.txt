@@ -1,0 +1,4 @@
+-r requirements-runtime.lock
+boto3==1.43.103
+msal==1.39.0
+requests==2.34.2
