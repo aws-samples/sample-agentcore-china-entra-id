@@ -4,7 +4,8 @@ import importlib.util
 import json
 from pathlib import Path
 import shutil
-import subprocess
+# Runs the fixed local Node test harness below, with no shell or remote input.
+import subprocess  # nosec B404
 import sys
 import time
 from types import ModuleType
@@ -284,7 +285,9 @@ const context = {
   process.stdout.write(JSON.stringify(requests));
 })().catch(() => { process.exitCode = 1; });
 """
-    result = subprocess.run(
+    # Executable resolved from the test environment; fixed harness, no shell,
+    # local source over stdin, fake network and a ten-second timeout.
+    result = subprocess.run(  # nosec B603
         [node, "-e", harness], input=json.dumps({
             "source": source, "scriptSrc": script_src, "documentURL": document_url,
         }), text=True, capture_output=True, check=True, timeout=10,

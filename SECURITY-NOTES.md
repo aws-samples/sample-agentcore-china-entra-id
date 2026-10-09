@@ -35,6 +35,9 @@ to an entire scanner or source directory.
 | Checkov `CKV_AWS_116` | The inventory Lambda is invoked synchronously. Lambda asynchronous dead-letter queues do not capture these requests; the caller receives the result or failure. Reassess when adding asynchronous triggers. |
 | Checkov `CKV_AWS_117` / cfn-nag `W89` | The inventory handler has no network calls or private resources; it returns in-memory synthetic data. Reassess network isolation when adding real dependencies or data. |
 | cfn-nag `W58` | CloudFormation creates the named log group before the function. The role grants `CreateLogStream` and `PutLogEvents` on that group's streams. The generic rule also expects `CreateLogGroup`, which this function does not need. |
+| Bandit `B105` in certificate tests | The offline transport's literal token and the mocked Secrets Manager ARN are synthetic fixtures, not credentials. Only those two assignments are excepted. |
+| Bandit `B404` / `B603` in portal tests | The test launches a fixed Node harness without a shell, reads only this repository's JavaScript, supplies a fake network and applies a ten-second timeout. Only the import and that invocation are excepted. |
+| Checkov `CKV_OPENAPI_3` | Older rules incorrectly reject all HTTP authentication schemes, including Bearer over HTTPS; upstream fixed this in 3.2.168. The `x-checkov` extension limits this temporary exception to that rule in the Graph OpenAPI document. Independent tests reject insecure server overrides, URL credentials and mislabeling opaque tokens as JWTs. Remove the exception once the scanning service uses the corrected rule. |
 
 The KMS key policy's `Resource: "*"` refers to the key that owns the policy, not
 all keys. The account-root statement enables key administration and IAM
@@ -64,3 +67,4 @@ References:
 - [AgentCore MCP container contract](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/runtime-mcp-protocol-contract.html)
 - [MSAL Python certificate credential API](https://msal-python.readthedocs.io/en/latest/#msal.ClientApplication)
 - [Lambda environment encryption and key permissions](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars-encryption.html)
+- [Checkov fix for the HTTP Bearer false positive](https://github.com/bridgecrewio/checkov/pull/6406)

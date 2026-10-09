@@ -33,7 +33,8 @@ CFG = {
 }
 AUTHORITY = f'{CFG["authority_host"]}/{CFG["tenant_id"]}'
 TOKEN_ENDPOINT = AUTHORITY + "/oauth2/v2.0/token"
-TEST_ACCESS_TOKEN = "offline-test-access-token"
+# Returned only by the offline HTTP transport below; not a usable credential.
+TEST_ACCESS_TOKEN = "offline-test-access-token"  # nosec B105
 TEST_USER_ASSERTION = "offline-test-user-assertion"
 
 
@@ -269,7 +270,8 @@ def test_cloud_status_reports_sha256_for_new_and_legacy_state(legacy, tmp_path, 
     metadata = {"sha256_fingerprint": "ab" * 32, "expires_at_utc": "2030-01-01T00:00:00+00:00"}
     if legacy:
         metadata["sha1_thumbprint"] = "unused-legacy-fingerprint"
-    secret_arn = "arn:aws-cn:secretsmanager:cn-north-1:123456789012:secret:offline-test"
+    # Synthetic resource identifier in mocked state, not a secret value.
+    secret_arn = "arn:aws-cn:secretsmanager:cn-north-1:123456789012:secret:offline-test"  # nosec B105
     state = {
         "account_id": CFG["account_id"], "region": CFG["region"],
         "runtime": {"id": "offline-runtime"}, "certificate": metadata,

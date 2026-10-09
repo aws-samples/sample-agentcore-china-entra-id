@@ -22,18 +22,25 @@ GRAPH_ME = GRAPH_BASE + "/v1.0/me"
 def graph_me(token, user_oid):
     """Treat Graph tokens as opaque; let Graph validate its own access token."""
     expected_oid = uuid.UUID(user_oid)
-    response = requests.get(
-        GRAPH_ME,
-        params={"$select": "id"},
-        headers={
-            "Authorization": "Bearer " + token,
-            "Accept": "application/json",
-            "client-request-id": str(uuid.uuid4()),
-            "return-client-request-id": "true",
-        },
-        timeout=(15, 60),
-        allow_redirects=False,
-    )
+    http_failed = False
+    try:
+        response = requests.get(
+            GRAPH_ME,
+            params={"$select": "id"},
+            headers={
+                "Authorization": "Bearer " + token,
+                "Accept": "application/json",
+                "client-request-id": str(uuid.uuid4()),
+                "return-client-request-id": "true",
+            },
+            timeout=(15, 60),
+            allow_redirects=False,
+        )
+        response.raise_for_status()
+    except requests.HTTPError as error:
+        if error.response is None:
+            raise RuntimeError("Graph HTTP request failed without a response") from None
+        response, http_failed = error.response, True
     report = {
         "operation": "GET China Graph /v1.0/me?$select=id",
         "http_status": response.status_code,
@@ -43,12 +50,8 @@ def graph_me(token, user_oid):
         "profile_values_recorded": False,
         "passed": False,
     }
-    try:
-        response.raise_for_status()
-    except requests.HTTPError:
-        # Report only status/trace metadata; never parse or log an error body.
-        return report
-    if response.status_code != 200:
+    # Report only status/trace metadata; never parse or log an error body.
+    if http_failed or response.status_code != 200:
         return report
     try:
         payload = response.json()

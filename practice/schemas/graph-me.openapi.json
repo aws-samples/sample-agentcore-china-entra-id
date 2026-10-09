@@ -19,7 +19,8 @@
       "GraphBearerAuth": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Microsoft Graph China delegated access token with User.Read. Configure outbound OAuth credentials on the AgentCore Gateway target; this schema contains no credentials."
+        "description": "Microsoft Graph China delegated access token with User.Read, treated as opaque. Configure outbound OAuth credentials on the AgentCore Gateway target; this schema contains no credentials.",
+        "x-checkov": "checkov:skip=CKV_OPENAPI_3:Known HTTP bearer false positive in Checkov before 3.2.168, fixed by https://github.com/bridgecrewio/checkov/pull/6406. This document uses only HTTPS Microsoft Graph China servers and opaque bearer tokens. Remove this document-scoped exception when the scanner uses the fixed rule."
       }
     }
   },

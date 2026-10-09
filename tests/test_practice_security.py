@@ -4,7 +4,9 @@ import fnmatch
 import json
 import re
 import unittest
+from copy import deepcopy
 from pathlib import Path
+from urllib.parse import urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -170,7 +172,63 @@ class PracticeSecurityTests(unittest.TestCase):
                 for name, scopes in alternative.items():
                     self.assertEqual(schemes[name]["type"], "http")
                     self.assertEqual(schemes[name]["scheme"], "bearer")
+                    self.assertEqual(
+                        schemes[name].get("bearerFormat", "opaque").casefold(), "opaque"
+                    )
                     self.assertEqual(scopes, [])
+
+    def assert_https_graph_servers(self, document):
+        """Check transport independently of the legacy CKV_OPENAPI_3 exception."""
+        self.assertTrue(document.get("servers"), "The default server must be explicit")
+        levels = [document]
+        for path in document["paths"].values():
+            levels.append(path)
+            levels.extend(
+                operation
+                for method, operation in path.items()
+                if method in {"get", "put", "post", "delete", "patch", "head", "options", "trace"}
+            )
+        for level in levels:
+            if "servers" not in level:
+                continue
+            self.assertTrue(level["servers"], "An empty override removes the HTTPS guarantee")
+            for server in level["servers"]:
+                url = urlsplit(server["url"])
+                self.assertEqual(url.scheme, "https")
+                self.assertEqual(url.hostname, "microsoftgraph.chinacloudapi.cn")
+                self.assertIn(url.port, (None, 443))
+                self.assertIsNone(url.username)
+                self.assertIsNone(url.password)
+                self.assertFalse(url.query, "Credentials must not be supplied in the URL")
+                self.assertFalse(url.fragment)
+
+    def test_graph_servers_use_https_without_url_credentials(self):
+        self.assert_https_graph_servers(OPENAPI)
+
+    def test_transport_guard_rejects_insecure_server_overrides(self):
+        for scope in ("document", "path", "operation"):
+            for replacement in (
+                # Negative-only transport fixture; never used for a network request.
+                [{"url": "http://microsoftgraph.chinacloudapi.cn/v1.0"}],
+                [],
+            ):
+                with self.subTest(scope=scope, servers=replacement):
+                    document = deepcopy(OPENAPI)
+                    level = {
+                        "document": document,
+                        "path": document["paths"]["/me"],
+                        "operation": document["paths"]["/me"]["get"],
+                    }[scope]
+                    level["servers"] = replacement
+                    with self.assertRaises(AssertionError):
+                        self.assert_https_graph_servers(document)
+
+    def test_openapi_exception_is_limited_to_the_known_bearer_false_positive(self):
+        annotation = OPENAPI["components"]["securitySchemes"]["GraphBearerAuth"]["x-checkov"]
+        self.assertTrue(annotation.startswith("checkov:skip=CKV_OPENAPI_3:"))
+        self.assertEqual(
+            re.findall(r"checkov:skip=([^:\s\"]+)", json.dumps(OPENAPI)), ["CKV_OPENAPI_3"]
+        )
 
 
 if __name__ == "__main__":

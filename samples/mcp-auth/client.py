@@ -51,15 +51,17 @@ class MCPClient:
             if not self.credentials:
                 raise ValueError("Signature tampering requires IAM signing")
             body += b" "
-        response = requests.post(
-            self.endpoint, data=body, headers=headers, timeout=(15, 120), allow_redirects=False,
-        )
         try:
+            response = requests.post(
+                self.endpoint, data=body, headers=headers, timeout=(15, 120), allow_redirects=False,
+            )
             response.raise_for_status()
-        except requests.HTTPError:
+        except requests.HTTPError as error:
             # Keep the status for the sample's access-denial checks, but never
             # accept an error body or session header as a successful MCP reply.
-            return response, {"error": {"message": "MCP HTTP request failed"}}
+            if error.response is None:
+                raise RuntimeError("MCP HTTP request failed without a response") from None
+            return error.response, {"error": {"message": "MCP HTTP request failed"}}
         if not 200 <= response.status_code < 300:
             return response, {"error": {"message": "Unexpected MCP HTTP status"}}
         try:

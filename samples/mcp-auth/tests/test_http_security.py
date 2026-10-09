@@ -94,6 +94,21 @@ class HttpSecurityTests(unittest.TestCase):
                 for sensitive in (user, "must-not-escape", "test-graph-token"):
                     self.assertNotIn(sensitive, json.dumps(report))
 
+    def test_http_exception_without_response_fails_closed_without_raw_error_text(self):
+        operations = (
+            ("client.requests.post", lambda: self.client.rpc("tools/list")),
+            ("obo.requests.get", lambda: obo.graph_me(
+                "test-graph-token", "00000000-0000-0000-0000-000000000001",
+            )),
+        )
+        for target, operation in operations:
+            with self.subTest(target=target):
+                with patch(target, side_effect=requests.HTTPError("must-not-escape")):
+                    with self.assertRaises(RuntimeError) as raised:
+                        operation()
+                self.assertNotIn("must-not-escape", str(raised.exception))
+                self.assertEqual(self.client.session_id, "existing-session")
+
 
 if __name__ == "__main__":
     unittest.main()
