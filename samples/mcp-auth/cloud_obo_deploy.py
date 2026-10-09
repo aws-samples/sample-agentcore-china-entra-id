@@ -57,7 +57,6 @@ def prepare_certificate():
             "purpose": "Separate certificate credential for the Runtime-hosted Entra OBO middle tier",
             "created_at_utc": now.isoformat(),
             "expires_at_utc": cert.not_valid_after_utc.isoformat(),
-            "sha1_thumbprint": cert.fingerprint(hashes.SHA1()).hex(),
             "sha256_fingerprint": cert.fingerprint(hashes.SHA256()).hex(),
             "entra_public_certificate_registered": False,
             "cloud_obo_executed": False,
@@ -69,6 +68,7 @@ def prepare_certificate():
         raise RuntimeError("Certificate metadata mismatch")
     if (CERT_DIR / "client-public.cer").read_bytes() != cert.public_bytes(serialization.Encoding.DER):
         raise RuntimeError("DER and PEM public certificates differ")
+    metadata.pop("sha1_thumbprint", None)
     public = ROOT / "dist/cloud-obo-runtime-public.cer"
     public.parent.mkdir(exist_ok=True)
     public.write_bytes(cert.public_bytes(serialization.Encoding.DER))
@@ -224,7 +224,7 @@ def status(cfg, sess):
         "nonsecret_runtime_config_matches": config_matches,
         "runtime_secret_reference_matches": secret_matches,
         "credential_source": "AWS Secrets Manager",
-        "certificate_sha1_thumbprint": state["certificate"]["sha1_thumbprint"],
+        "certificate_sha256_fingerprint": state["certificate"]["sha256_fingerprint"],
         "certificate_expires_at_utc": state["certificate"]["expires_at_utc"],
         "entra_public_certificate_registration": "pending_user_confirmation",
         "employee_cloud_obo_test": "pending", "agentcore_identity_native_oauth_tested": False,

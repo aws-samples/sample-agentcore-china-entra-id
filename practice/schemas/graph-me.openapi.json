@@ -9,12 +9,31 @@
       "url": "https://microsoftgraph.chinacloudapi.cn/v1.0"
     }
   ],
+  "security": [
+    {
+      "GraphBearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "GraphBearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Microsoft Graph China delegated access token with User.Read. Configure outbound OAuth credentials on the AgentCore Gateway target; this schema contains no credentials."
+      }
+    }
+  },
   "paths": {
     "/me": {
       "get": {
         "operationId": "get_my_identity",
         "summary": "Read only the signed-in employee object ID",
         "description": "Requires delegated Microsoft Graph User.Read. Configure OAuth on the AgentCore Gateway target.",
+        "security": [
+          {
+            "GraphBearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "$select",

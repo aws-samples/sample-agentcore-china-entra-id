@@ -103,5 +103,39 @@ class GatewayOAuthTests(unittest.TestCase):
         self.assertEqual(policy["Statement"][-1]["Resource"], self.provider["client_secret_arn"])
 
 
+class GatewayReadinessTests(unittest.TestCase):
+    def test_ready_result_returns_without_waiting(self):
+        get = MagicMock(return_value={"status": "READY", "gatewayId": "tracked"})
+        with patch.object(gateway_oauth.time, "sleep") as sleep:
+            result = gateway_oauth.wait_ready(get, "Gateway")
+        self.assertEqual(result["gatewayId"], "tracked")
+        get.assert_called_once()
+        sleep.assert_not_called()
+
+    def test_waits_between_status_checks_until_ready(self):
+        get = MagicMock(side_effect=[{"status": "CREATING"}, {"status": "READY"}])
+        with patch.object(gateway_oauth.time, "sleep") as sleep:
+            self.assertEqual(gateway_oauth.wait_ready(get, "Gateway")["status"], "READY")
+        self.assertEqual(get.call_count, 2)
+        sleep.assert_called_once_with(5)
+
+    def test_terminal_failure_never_waits_or_reports_success(self):
+        for status in ("FAILED", "CREATE_FAILED", "UPDATE_UNSUCCESSFUL"):
+            with self.subTest(status=status):
+                with patch.object(gateway_oauth.time, "sleep") as sleep:
+                    with self.assertRaisesRegex(RuntimeError, "failed"):
+                        gateway_oauth.wait_ready(lambda: {"status": status}, "Gateway")
+                sleep.assert_not_called()
+
+    def test_provisioning_timeout_is_bounded_and_does_not_sleep_after_last_check(self):
+        get = MagicMock(return_value={"status": "CREATING"})
+        with patch.object(gateway_oauth.time, "sleep") as sleep:
+            with self.assertRaisesRegex(RuntimeError, "still provisioning"):
+                gateway_oauth.wait_ready(get, "Gateway")
+        self.assertEqual(get.call_count, 30)
+        self.assertEqual(sleep.call_count, 29)
+        self.assertTrue(all(call.args == (5,) for call in sleep.call_args_list))
+
+
 if __name__ == "__main__":
     unittest.main()

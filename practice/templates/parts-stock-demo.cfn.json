@@ -1,6 +1,20 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Optional read-only synthetic inventory tool for AgentCore Gateway console practice. No authentication code.",
+  "Description": "Optional read-only synthetic inventory tool for AgentCore Gateway console practice, with encrypted logs and environment variables. No authentication code.",
+  "Metadata": {
+    "SecurityDesign": {
+      "Invocation": "Synchronous Gateway tool returning in-memory synthetic inventory. Reassess the function-level DLQ and VPC exceptions if adding asynchronous triggers, private resources or real business data.",
+      "Encryption": "One rotating, stack-managed symmetric KMS key protects this demo's logs and server-side Lambda environment encryption. Lambda creates its environment encryption grant using the deployment principal's permissions; the handler does not call KMS.",
+      "Deployment": "The deployment principal needs KMS key-management permissions, kms:DescribeKey to associate encrypted logs, and kms:CreateGrant/kms:Encrypt for Lambda. Customer-managed KMS charges apply. Five reserved executions require sufficient account concurrency quota.",
+      "References": [
+        "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-add-target-lambda.html",
+        "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html",
+        "https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars-encryption.html",
+        "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-retain-records.html",
+        "https://docs.aws.amazon.com/kms/latest/developerguide/conditions-kms.html#conditions-kms-via-service"
+      ]
+    }
+  },
   "Parameters": {
     "PracticeName": {
       "Type": "String",
@@ -17,17 +31,78 @@
     }
   },
   "Resources": {
+    "StockEncryptionKey": {
+      "Type": "AWS::KMS::Key",
+      "Metadata": {
+        "SecurityDesign": "Resource '*' in this key policy means only the key to which the policy is attached. The account-root statement enables IAM delegation and key administration; it does not grant the Lambda role kms:*. CloudWatch Logs cryptographic use is restricted to this exact log group's encryption context."
+      },
+      "Properties": {
+        "Description": "Encryption for the synthetic inventory demo logs and Lambda environment",
+        "EnableKeyRotation": true,
+        "PendingWindowInDays": 7,
+        "KeyPolicy": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "EnableAccountIAMPermissions",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:root"
+                }
+              },
+              "Action": "kms:*",
+              "Resource": "*"
+            },
+            {
+              "Sid": "EncryptOnlyStockLogs",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": {
+                  "Fn::Sub": "logs.${AWS::Region}.${AWS::URLSuffix}"
+                }
+              },
+              "Action": [
+                "kms:Encrypt",
+                "kms:Decrypt",
+                "kms:ReEncryptFrom",
+                "kms:ReEncryptTo",
+                "kms:GenerateDataKey",
+                "kms:GenerateDataKeyWithoutPlaintext"
+              ],
+              "Resource": "*",
+              "Condition": {
+                "ArnEquals": {
+                  "kms:EncryptionContext:aws:logs:arn": {
+                    "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${PracticeName}-stock"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
     "StockLogs": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
         "LogGroupName": {
           "Fn::Sub": "/aws/lambda/${PracticeName}-stock"
         },
-        "RetentionInDays": 7
+        "RetentionInDays": 7,
+        "KmsKeyId": {
+          "Fn::GetAtt": [
+            "StockEncryptionKey",
+            "Arn"
+          ]
+        }
       }
     },
     "StockExecutionRole": {
       "Type": "AWS::IAM::Role",
+      "Metadata": {
+        "SecurityDesign": "KMS ViaService names use the .amazonaws.com suffix in all partitions, as documented by KMS; the regional Logs principal uses AWS::URLSuffix. Key data permissions require both the regional Logs service and this exact log group's encryption context. The role has no key-management or direct environment-decryption permissions."
+      },
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
@@ -54,10 +129,45 @@
                     "logs:PutLogEvents"
                   ],
                   "Resource": {
+                    "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${PracticeName}-stock:log-stream:*"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "UseKeyOnlyThroughStockLogs",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "EncryptedStockLogData",
+                  "Effect": "Allow",
+                  "Action": [
+                    "kms:Encrypt",
+                    "kms:Decrypt",
+                    "kms:ReEncryptFrom",
+                    "kms:ReEncryptTo",
+                    "kms:GenerateDataKey",
+                    "kms:GenerateDataKeyWithoutPlaintext"
+                  ],
+                  "Resource": {
                     "Fn::GetAtt": [
-                      "StockLogs",
+                      "StockEncryptionKey",
                       "Arn"
                     ]
+                  },
+                  "Condition": {
+                    "StringEquals": {
+                      "kms:ViaService": {
+                        "Fn::Sub": "logs.${AWS::Region}.amazonaws.com"
+                      }
+                    },
+                    "ArnEquals": {
+                      "kms:EncryptionContext:aws:logs:arn": {
+                        "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${PracticeName}-stock"
+                      }
+                    }
                   }
                 }
               ]
@@ -68,6 +178,32 @@
     },
     "StockFunction": {
       "Type": "AWS::Lambda::Function",
+      "Metadata": {
+        "checkov": {
+          "skip": [
+            {
+              "id": "CKV_AWS_116",
+              "comment": "Gateway uses this read-only tool synchronously and receives the result or error directly. This stack defines no asynchronous trigger; Lambda DLQs capture failed asynchronous invocations only. Reassess if asynchronous invocation is introduced."
+            },
+            {
+              "id": "CKV_AWS_117",
+              "comment": "The handler returns only in-memory synthetic inventory and has no network calls or private resources. VPC attachment adds subnet, security-group and ENI requirements without protecting a data connection. Reassess if private dependencies or real data are introduced."
+            }
+          ]
+        },
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W89",
+              "reason": "This synchronous synthetic fixture has no network calls or private resources. A VPC and ENI permissions are unnecessary; reassess if the handler gains private dependencies or real data."
+            },
+            {
+              "id": "W58",
+              "reason": "StockLogs is pre-created by CloudFormation and StockFunction explicitly depends on it. StockExecutionRole grants logs:CreateLogStream and logs:PutLogEvents only on that group's streams; logs:CreateLogGroup is deliberately unnecessary."
+            }
+          ]
+        }
+      },
       "DependsOn": [
         "StockLogs"
       ],
@@ -79,6 +215,13 @@
         "Handler": "index.handler",
         "Timeout": 10,
         "MemorySize": 128,
+        "ReservedConcurrentExecutions": 5,
+        "KmsKeyArn": {
+          "Fn::GetAtt": [
+            "StockEncryptionKey",
+            "Arn"
+          ]
+        },
         "Role": {
           "Fn::GetAtt": [
             "StockExecutionRole",

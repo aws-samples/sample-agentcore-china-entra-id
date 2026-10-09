@@ -1,0 +1,5 @@
+# These two historical findings are UUID application identifiers in mocked
+# OAuth unit-test configuration, not passwords, client secrets, or API keys.
+# Match only these exact findings; retain scanning for every other value.
+378dfe89565c55e8dec4767293fba4272cde1fc6:samples/mcp-auth/tests/test_quick_oauth_compat.py:generic-api-key:18
+378dfe89565c55e8dec4767293fba4272cde1fc6:samples/mcp-auth/tests/test_quick_oauth_compat.py:generic-api-key:19

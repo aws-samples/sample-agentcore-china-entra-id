@@ -126,7 +126,7 @@ def certificate_credential(private_key, certificate_pem):
     """Build an MSAL credential from validated PEM bytes without writing files."""
     from datetime import datetime, timezone
     from cryptography import x509
-    from cryptography.hazmat.primitives import hashes, serialization
+    from cryptography.hazmat.primitives import serialization
     from cryptography.hazmat.primitives.asymmetric import rsa
 
     certificate = x509.load_pem_x509_certificate(certificate_pem)
@@ -142,8 +142,9 @@ def certificate_credential(private_key, certificate_pem):
         serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo,
     ):
         raise RuntimeError("Client certificate and private key do not match")
+    # MSAL >= 1.35 selects SHA-256 for PEM certificates without a legacy thumbprint.
     return {"private_key": private_key.decode("ascii"),
-            "thumbprint": certificate.fingerprint(hashes.SHA1()).hex()}
+            "public_certificate": certificate_pem.decode("ascii")}
 
 
 def confidential_client(cfg, method, *, client_id=None):

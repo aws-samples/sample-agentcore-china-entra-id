@@ -54,8 +54,14 @@ class MCPClient:
         response = requests.post(
             self.endpoint, data=body, headers=headers, timeout=(15, 120), allow_redirects=False,
         )
-        if response.headers.get("Mcp-Session-Id"):
-            self.session_id = response.headers["Mcp-Session-Id"]
+        try:
+            response.raise_for_status()
+        except requests.HTTPError:
+            # Keep the status for the sample's access-denial checks, but never
+            # accept an error body or session header as a successful MCP reply.
+            return response, {"error": {"message": "MCP HTTP request failed"}}
+        if not 200 <= response.status_code < 300:
+            return response, {"error": {"message": "Unexpected MCP HTTP status"}}
         try:
             value = response.json()
         except ValueError:
@@ -68,8 +74,10 @@ class MCPClient:
                         break
         if not isinstance(value, dict):
             value = {}
-        if response.ok and not notification and value.get("id") != message["id"]:
+        if not notification and value.get("id") != message["id"]:
             raise RuntimeError("MCP response ID mismatch")
+        if response.headers.get("Mcp-Session-Id"):
+            self.session_id = response.headers["Mcp-Session-Id"]
         return response, value
 
     def initialize(self):

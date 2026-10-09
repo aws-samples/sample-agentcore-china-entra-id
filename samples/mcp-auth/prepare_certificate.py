@@ -37,7 +37,6 @@ def main():
     metadata = {
         "purpose": "Test OAuth client authentication only; not a TLS server certificate",
         "created_at_utc": now.isoformat(), "expires_at_utc": cert.not_valid_after_utc.isoformat(),
-        "sha1_thumbprint": cert.fingerprint(hashes.SHA1()).hex(),
         "sha256_fingerprint": cert.fingerprint(hashes.SHA256()).hex(),
         "entra_public_certificate_registered": False,
         "certificate_flow_executed": False,

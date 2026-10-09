@@ -34,6 +34,8 @@ async def ping(request):
 
 if __name__ == "__main__":
     server.run(
-        transport="streamable-http", host="0.0.0.0", port=8000,
+        # Required inside the AgentCore container; the Runtime authorizer
+        # and the tool's independent token validation protect invocation.
+        transport="streamable-http", host="0.0.0.0", port=8000,  # nosec B104
         stateless_http=True, json_response=True,
     )

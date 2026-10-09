@@ -13,10 +13,11 @@ import quick_oauth_compat as compat
 
 class QuickOAuthCompatTests(unittest.TestCase):
     def setUp(self):
+        # Synthetic UUIDs; both roles intentionally use the same application.
         self.cfg = {
-            "tenant_id": "b2081eba-d051-4b2b-b897-6fb4674d562e",
-            "client_id": "e9d35449-4d98-49a2-880f-224548b62f83",
-            "api_app_id": "e9d35449-4d98-49a2-880f-224548b62f83",
+            "tenant_id": "00000000-0000-4000-8000-000000000001",
+            "client_id": "00000000-0000-4000-8000-000000000002",
+            "api_app_id": "00000000-0000-4000-8000-000000000002",
             "authority_host": "https://login.partner.microsoftonline.cn",
             "scope": "agent.invoke",
             "resource_uri": "https://sample-jwt-0123456789.gateway.bedrock-agentcore.cn-north-1.amazonaws.com.cn/mcp",

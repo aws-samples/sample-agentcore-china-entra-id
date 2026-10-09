@@ -58,6 +58,7 @@ def oauth_target(cfg, provider, endpoint):
 
 
 def wait_ready(get, label):
+    """Poll a tracked deployment at most 30 times; never infer readiness from time."""
     previous = None
     for attempt in range(30):
         value = get()
@@ -69,7 +70,10 @@ def wait_ready(get, label):
             return value
         if status in ("FAILED", "CREATE_FAILED", "UPDATE_UNSUCCESSFUL"):
             raise RuntimeError(label + " failed; inspect its recorded resource ID")
-        time.sleep(5)
+        if attempt < 29:
+            # Intentional provisioning backoff: readiness is checked above on
+            # every attempt, with at most 29 waits and no wait after exhaustion.
+            time.sleep(5)  # nosemgrep: arbitrary-sleep
     raise RuntimeError(label + " is still provisioning; rerun to continue tracked resources")
 
 

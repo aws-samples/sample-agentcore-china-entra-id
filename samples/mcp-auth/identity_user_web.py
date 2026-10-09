@@ -8,7 +8,7 @@ from pathlib import Path
 import re
 import secrets
 import time
-from urllib.parse import urlparse
+from urllib.parse import urlsplit, urlunsplit
 
 import boto3
 from botocore.exceptions import ClientError
@@ -100,9 +100,11 @@ def response(status, body="", content_type="application/json; charset=utf-8", **
         "headers": {
             "Content-Type": content_type, "Cache-Control": "no-store",
             "Referrer-Policy": "no-referrer", "X-Content-Type-Options": "nosniff",
-            "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self'; "
-                "img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; "
-                "base-uri 'none'; form-action 'self'",
+            "Content-Security-Policy": "; ".join((
+                "default-src 'self'", "script-src 'self'", "style-src 'self'",
+                "img-src 'self' data:", "connect-src 'self'", "frame-ancestors 'none'",
+                "base-uri 'none'", "form-action 'self'",
+            )),
             "Strict-Transport-Security": "max-age=31536000",
             **extra.pop("headers", {}),
         },
@@ -117,8 +119,44 @@ def redirect(url, cookies=None):
                     **({"multiValueHeaders": {"Set-Cookie": cookies}} if cookies else {}))
 
 
+def safe_app_path(path):
+    return (
+        re.fullmatch(r"/[A-Za-z0-9._~/-]*", path) is not None
+        and "//" not in path
+        and not any(part in (".", "..") for part in path.split("/"))
+    )
+
+
+def portal_base_url():
+    """Validate deployment configuration before it can become a redirect or origin."""
+    value = os.environ.get("PORTAL_BASE_URL", "")
+    # Restrict before parsing: URL parsers may discard control characters. Percent
+    # escapes, userinfo, queries, fragments and backslashes have no role in this
+    # sample's HTTPS DNS name and unreserved deployment path.
+    if not re.fullmatch(r"https://[A-Za-z0-9.-]+(?::[0-9]+)?(?:/[A-Za-z0-9._~/-]*)?", value):
+        raise WebError("invalid_portal_base_url", 500)
+    try:
+        parsed = urlsplit(value)
+        port = parsed.port
+    except ValueError:
+        raise WebError("invalid_portal_base_url", 500) from None
+    hostname = parsed.hostname
+    if (
+        not hostname or len(hostname) > 253 or port == 0
+        or any(not re.fullmatch(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?", label)
+               for label in hostname.split("."))
+        or (parsed.path and not safe_app_path(parsed.path))
+    ):
+        raise WebError("invalid_portal_base_url", 500)
+    authority = hostname if port in (None, 443) else f"{hostname}:{port}"
+    return urlunsplit(("https", authority, parsed.path.rstrip("/"), "", ""))
+
+
 def app_url(path="/"):
-    return os.environ["PORTAL_BASE_URL"] + path
+    if not safe_app_path(path):
+        raise WebError("invalid_application_path", 500)
+    # A leading route slash must not replace the API Gateway stage/base path.
+    return f"{portal_base_url()}{path}"
 
 
 def msal_app(cfg):
@@ -143,7 +181,7 @@ def query_params(event):
 
 
 def check_csrf(event, session):
-    origin = urlparse(os.environ["PORTAL_BASE_URL"])
+    origin = urlsplit(portal_base_url())
     if headers(event).get("origin") != f"{origin.scheme}://{origin.netloc}":
         raise WebError("origin_mismatch", 403)
     supplied = headers(event).get("x-csrf-token", "")
@@ -296,11 +334,16 @@ def worker(event):
 
 
 def web(event):
+    portal_base_url()
     path, method = event.get("path", "/"), event.get("httpMethod", "GET")
-    if method == "GET" and path in ("/", "/app.js", "/app.css"):
-        name = {"/": "index.html", "/app.js": "app.js", "/app.css": "app.css"}[path]
-        mime = {"/": "text/html", "/app.js": "text/javascript", "/app.css": "text/css"}[path]
-        text = (STATIC / name).read_text(encoding="utf-8").replace("{{BASE}}", os.environ["PORTAL_BASE_URL"])
+    if method == "GET" and path == "/":
+        # Gateway can map both /stage and /stage/ to "/". A fixed document path
+        # makes relative links unambiguous without trusting Host/forwarded headers.
+        return redirect(app_url("/index.html"))
+    if method == "GET" and path in ("/index.html", "/app.js", "/app.css"):
+        name = {"/index.html": "index.html", "/app.js": "app.js", "/app.css": "app.css"}[path]
+        mime = {"/index.html": "text/html", "/app.js": "text/javascript", "/app.css": "text/css"}[path]
+        text = (STATIC / name).read_text(encoding="utf-8")
         return response(200, text, mime + "; charset=utf-8")
     cfg, store = settings(), Store()
     if path == "/login" and method == "GET":

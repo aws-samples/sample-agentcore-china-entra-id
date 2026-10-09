@@ -32,5 +32,7 @@ async def ping(request):
 
 
 if __name__ == "__main__":
-    server.run(transport="streamable-http", host="0.0.0.0", port=8000,
+    # AgentCore's MCP container contract requires this bind address. Runtime
+    # authentication and identity_user_core token validation remain required.
+    server.run(transport="streamable-http", host="0.0.0.0", port=8000,  # nosec B104
                stateless_http=True, json_response=True)

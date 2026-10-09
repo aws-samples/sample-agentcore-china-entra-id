@@ -34,25 +34,35 @@ def graph_me(token, user_oid):
         timeout=(15, 60),
         allow_redirects=False,
     )
+    report = {
+        "operation": "GET China Graph /v1.0/me?$select=id",
+        "http_status": response.status_code,
+        "request_id": response.headers.get("request-id"),
+        "same_user_as_verified_token_a": False,
+        "profile_fields_requested": ["id"],
+        "profile_values_recorded": False,
+        "passed": False,
+    }
+    try:
+        response.raise_for_status()
+    except requests.HTTPError:
+        # Report only status/trace metadata; never parse or log an error body.
+        return report
+    if response.status_code != 200:
+        return report
     try:
         payload = response.json()
     except ValueError:
         payload = {}
     same_user = False
-    if response.status_code == 200 and isinstance(payload, dict):
+    if isinstance(payload, dict):
         try:
             same_user = uuid.UUID(payload.get("id", "")) == expected_oid
         except (ValueError, TypeError, AttributeError):
             pass
-    return {
-        "operation": "GET China Graph /v1.0/me?$select=id",
-        "http_status": response.status_code,
-        "request_id": response.headers.get("request-id"),
-        "same_user_as_verified_token_a": same_user,
-        "profile_fields_requested": ["id"],
-        "profile_values_recorded": False,
-        "passed": response.status_code == 200 and same_user,
-    }
+    report["same_user_as_verified_token_a"] = same_user
+    report["passed"] = same_user
+    return report
 
 
 def exchange_and_call(cfg, token_a, middle_tier):
