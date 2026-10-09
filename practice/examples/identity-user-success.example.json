@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "completed_at_utc": "2026-09-30T08:40:16Z",
+  "flow": "USER_FEDERATION",
+  "client_authentication": "client_secret",
+  "agentcore_runtime_used": true,
+  "agentcore_identity_used": true,
+  "token_a_validated": true,
+  "identity_access_token_received": true,
+  "profile_values_recorded": false,
+  "tokens_recorded": false,
+  "graph": {
+    "operation": "GET China Graph /v1.0/me?$select=id",
+    "http_status": 200,
+    "passed": true,
+    "same_user_as_verified_token_a": true,
+    "profile_values_recorded": false
+  },
+  "session_binding": {
+    "operation": "CompleteResourceTokenAuth",
+    "http_status": 200,
+    "current_browser_session_checked": true,
+    "custom_state_checked": true
+  }
+}

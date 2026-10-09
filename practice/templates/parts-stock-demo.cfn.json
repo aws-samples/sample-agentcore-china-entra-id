@@ -1,0 +1,123 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Optional read-only synthetic inventory tool for AgentCore Gateway console practice. No authentication code.",
+  "Parameters": {
+    "PracticeName": {
+      "Type": "String",
+      "Default": "agentcore-parts-practice",
+      "MinLength": 3,
+      "MaxLength": 48,
+      "AllowedPattern": "[a-zA-Z][a-zA-Z0-9-]*"
+    },
+    "DemoPartNumber": {
+      "Type": "String",
+      "Default": "DEMO-PART-001",
+      "MinLength": 1,
+      "MaxLength": 64
+    }
+  },
+  "Resources": {
+    "StockLogs": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Sub": "/aws/lambda/${PracticeName}-stock"
+        },
+        "RetentionInDays": 7
+      }
+    },
+    "StockExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "WriteOwnLogs",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "StockLogs",
+                      "Arn"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "StockFunction": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": [
+        "StockLogs"
+      ],
+      "Properties": {
+        "FunctionName": {
+          "Fn::Sub": "${PracticeName}-stock"
+        },
+        "Runtime": "python3.12",
+        "Handler": "index.handler",
+        "Timeout": 10,
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "StockExecutionRole",
+            "Arn"
+          ]
+        },
+        "Environment": {
+          "Variables": {
+            "DEMO_PART_NUMBER": {
+              "Ref": "DemoPartNumber"
+            }
+          }
+        },
+        "Code": {
+          "ZipFile": "import os\n\ndef handler(event, context):\n    part = event.get(\"part_number\") if isinstance(event, dict) else None\n    if part != os.environ[\"DEMO_PART_NUMBER\"]:\n        return {\"found\": False, \"part_number\": part, \"data_kind\": \"synthetic_demo\"}\n    return {\n        \"found\": True,\n        \"part_number\": part,\n        \"warehouse\": \"DEMO-CN\",\n        \"quantity\": 12,\n        \"unit\": \"piece\",\n        \"data_kind\": \"synthetic_demo\"\n    }\n"
+        },
+        "Tags": [
+          {
+            "Key": "Purpose",
+            "Value": "AgentCore-practice"
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "PartsFunctionArn": {
+      "Description": "Use as the Gateway Lambda target ARN.",
+      "Value": {
+        "Fn::GetAtt": [
+          "StockFunction",
+          "Arn"
+        ]
+      }
+    },
+    "DemoPartNumber": {
+      "Value": {
+        "Ref": "DemoPartNumber"
+      }
+    }
+  }
+}

@@ -1,0 +1,1264 @@
+{
+  "info": {
+    "_postman_id": "576553bb-2181-4c19-8d67-2f905828a9f2",
+    "name": "AgentCore China manual authentication validation",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Manual HTTP requests, with no pre-request or test scripts. Templates are structurally checked, not a new live-test report. Read README.zh-CN.md before use."
+  },
+  "item": [
+    {
+      "name": "00 Obtain Entra application token using secret",
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "https://login.partner.microsoftonline.cn/{{tenant_id}}/oauth2/v2.0/token",
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "client_id",
+              "value": "{{client_id}}",
+              "type": "text"
+            },
+            {
+              "key": "client_secret",
+              "value": "{{client_secret}}",
+              "type": "text"
+            },
+            {
+              "key": "grant_type",
+              "value": "client_credentials",
+              "type": "text"
+            },
+            {
+              "key": "scope",
+              "value": "{{app_scope}}",
+              "type": "text"
+            }
+          ]
+        },
+        "description": "Use only an approved local secret store. Manually use the returned access_token as app_access_token. Do not export actual secrets or tokens."
+      },
+      "response": []
+    },
+    {
+      "name": "01 Employee JWT Gateway",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{user_access_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "01 Initialize",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              }
+            ],
+            "url": "{{user_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"initialize\",\n  \"id\": 1,\n  \"params\": {\n    \"protocolVersion\": \"{{protocol_version}}\",\n    \"capabilities\": {},\n    \"clientInfo\": {\n      \"name\": \"postman-manual-review\",\n      \"version\": \"1.0\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "02 Initialized",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{user_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"notifications/initialized\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "03 List tools",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{user_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/list\",\n  \"id\": 2,\n  \"params\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "04 Call stock tool",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{user_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"id\": 3,\n  \"params\": {\n    \"name\": \"{{tool_name}}\",\n    \"arguments\": {\n      \"part_number\": \"{{part_number}}\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "05 Unknown part business error",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{user_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"id\": 4,\n  \"params\": {\n    \"name\": \"{{tool_name}}\",\n    \"arguments\": {\n      \"part_number\": \"DEMO-PART-UNKNOWN\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "06 Call maintenance tool",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{user_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"id\": 5,\n  \"params\": {\n    \"name\": \"{{maintenance_tool_name}}\",\n    \"arguments\": {\n      \"fault_code\": \"P-DEMO-001\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 Application JWT Gateway",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{app_access_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "01 Initialize",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              }
+            ],
+            "url": "{{app_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"initialize\",\n  \"id\": 1,\n  \"params\": {\n    \"protocolVersion\": \"{{protocol_version}}\",\n    \"capabilities\": {},\n    \"clientInfo\": {\n      \"name\": \"postman-manual-review\",\n      \"version\": \"1.0\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "02 Initialized",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{app_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"notifications/initialized\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "03 List tools",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{app_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/list\",\n  \"id\": 2,\n  \"params\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "04 Call stock tool",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{app_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"id\": 3,\n  \"params\": {\n    \"name\": \"{{tool_name}}\",\n    \"arguments\": {\n      \"part_number\": \"{{part_number}}\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "05 Unknown part business error",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{app_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"id\": 4,\n  \"params\": {\n    \"name\": \"{{tool_name}}\",\n    \"arguments\": {\n      \"part_number\": \"DEMO-PART-UNKNOWN\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "06 Call maintenance tool",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{app_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"id\": 5,\n  \"params\": {\n    \"name\": \"{{maintenance_tool_name}}\",\n    \"arguments\": {\n      \"fault_code\": \"P-DEMO-001\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 IAM Gateway",
+      "auth": {
+        "type": "awsv4",
+        "awsv4": [
+          {
+            "key": "accessKey",
+            "value": "{{aws_access_key}}",
+            "type": "string"
+          },
+          {
+            "key": "secretKey",
+            "value": "{{aws_secret_key}}",
+            "type": "string"
+          },
+          {
+            "key": "sessionToken",
+            "value": "{{aws_session_token}}",
+            "type": "string"
+          },
+          {
+            "key": "region",
+            "value": "{{aws_region}}",
+            "type": "string"
+          },
+          {
+            "key": "service",
+            "value": "bedrock-agentcore",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "01 Initialize",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              }
+            ],
+            "url": "{{iam_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"initialize\",\n  \"id\": 1,\n  \"params\": {\n    \"protocolVersion\": \"{{protocol_version}}\",\n    \"capabilities\": {},\n    \"clientInfo\": {\n      \"name\": \"postman-manual-review\",\n      \"version\": \"1.0\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "02 Initialized",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{iam_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"notifications/initialized\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "03 List tools",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{iam_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/list\",\n  \"id\": 2,\n  \"params\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "04 Call stock tool",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{iam_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"id\": 3,\n  \"params\": {\n    \"name\": \"{{tool_name}}\",\n    \"arguments\": {\n      \"part_number\": \"{{part_number}}\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "05 Unknown part business error",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{iam_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"id\": 4,\n  \"params\": {\n    \"name\": \"{{tool_name}}\",\n    \"arguments\": {\n      \"part_number\": \"DEMO-PART-UNKNOWN\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "06 Call maintenance tool",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{iam_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"id\": 5,\n  \"params\": {\n    \"name\": \"{{maintenance_tool_name}}\",\n    \"arguments\": {\n      \"fault_code\": \"P-DEMO-001\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 IAM Gateway with OAuth outbound",
+      "auth": {
+        "type": "awsv4",
+        "awsv4": [
+          {
+            "key": "accessKey",
+            "value": "{{aws_access_key}}",
+            "type": "string"
+          },
+          {
+            "key": "secretKey",
+            "value": "{{aws_secret_key}}",
+            "type": "string"
+          },
+          {
+            "key": "sessionToken",
+            "value": "{{aws_session_token}}",
+            "type": "string"
+          },
+          {
+            "key": "region",
+            "value": "{{aws_region}}",
+            "type": "string"
+          },
+          {
+            "key": "service",
+            "value": "bedrock-agentcore",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "01 Initialize",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              }
+            ],
+            "url": "{{oauth_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"initialize\",\n  \"id\": 1,\n  \"params\": {\n    \"protocolVersion\": \"{{protocol_version}}\",\n    \"capabilities\": {},\n    \"clientInfo\": {\n      \"name\": \"postman-manual-review\",\n      \"version\": \"1.0\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "02 Initialized",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{oauth_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"notifications/initialized\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "03 List tools",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{oauth_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/list\",\n  \"id\": 2,\n  \"params\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "04 Call stock tool",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{oauth_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"id\": 3,\n  \"params\": {\n    \"name\": \"{{tool_name}}\",\n    \"arguments\": {\n      \"part_number\": \"{{part_number}}\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "05 Unknown part business error",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{oauth_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"id\": 4,\n  \"params\": {\n    \"name\": \"{{tool_name}}\",\n    \"arguments\": {\n      \"part_number\": \"DEMO-PART-UNKNOWN\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "06 Call maintenance tool",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{oauth_gateway_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"id\": 5,\n  \"params\": {\n    \"name\": \"{{maintenance_tool_name}}\",\n    \"arguments\": {\n      \"fault_code\": \"P-DEMO-001\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 Employee JWT to certificate OBO Runtime",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{user_access_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "01 Initialize",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              }
+            ],
+            "url": "{{obo_runtime_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"initialize\",\n  \"id\": 1,\n  \"params\": {\n    \"protocolVersion\": \"{{protocol_version}}\",\n    \"capabilities\": {},\n    \"clientInfo\": {\n      \"name\": \"postman-manual-review\",\n      \"version\": \"1.0\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "02 Initialized",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{obo_runtime_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"notifications/initialized\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "03 List tools",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{obo_runtime_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/list\",\n  \"id\": 2,\n  \"params\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        },
+        {
+          "name": "04 Call OBO identity tool",
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream"
+              },
+              {
+                "key": "MCP-Protocol-Version",
+                "value": "{{protocol_version}}"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{mcp_session_id}}",
+                "disabled": true,
+                "description": "Enable only if initialization returns this header. Use a separate session per endpoint and user."
+              }
+            ],
+            "url": "{{obo_runtime_url}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"id\": 3,\n  \"params\": {\n    \"name\": \"{{obo_tool_name}}\",\n    \"arguments\": {}\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send manually. Inspect transport, JSON-RPC and tool result separately. No scripts run."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

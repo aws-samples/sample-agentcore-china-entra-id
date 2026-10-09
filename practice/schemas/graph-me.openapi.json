@@ -1,0 +1,55 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Current employee identity in Microsoft Graph China",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://microsoftgraph.chinacloudapi.cn/v1.0"
+    }
+  ],
+  "paths": {
+    "/me": {
+      "get": {
+        "operationId": "get_my_identity",
+        "summary": "Read only the signed-in employee object ID",
+        "description": "Requires delegated Microsoft Graph User.Read. Configure OAuth on the AgentCore Gateway target.",
+        "parameters": [
+          {
+            "name": "$select",
+            "in": "query",
+            "required": true,
+            "description": "Return only the id field",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current employee identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "@odata.context": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
