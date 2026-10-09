@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Shared synthetic tools. Authentication is enforced by the Runtime front door.
 
 These tools contain no employee-specific data and make no business ACL claim.

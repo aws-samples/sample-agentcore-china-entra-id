@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """OBO middle tier hosted by Runtime; private material is read only in memory."""
 import json
 import os

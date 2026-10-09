@@ -10,7 +10,7 @@
 
 用户 OAuth 路线使用 Runtime、Identity、API Gateway、Lambda、DynamoDB、Secrets Manager、S3、IAM 和 CloudWatch Logs。OBO 路线使用 Runtime、Secrets Manager、S3、IAM 和 CloudWatch Logs。员工浏览器不需要部署权限。
 
-解压配套 ZIP，进入 `agentcore-china-entra-id-samples/samples/mcp-auth`。后续命令均在此目录执行：
+解压配套 ZIP，进入 `sample-agentcore-china-entra-id-main/samples/mcp-auth`。后续命令均在此目录执行：
 
 ```bash
 export AWS_PROFILE=agentcore-cn

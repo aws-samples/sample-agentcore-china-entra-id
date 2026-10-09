@@ -6,11 +6,11 @@
 
 需要使用现成客户端独立检查时，先阅读[手动验收说明](../manual-validation/README.zh-CN.md)。配套提供29个 Postman HTTP 请求与空白环境模板，不含自动测试脚本或真实凭据。按步骤查看实际请求和响应，再对照业务来源与平台记录；模板的本地检查不等于已经完成云端或真实业务验收。下文保留部署和回归操作，便于复现服务。
 
-[下载完整代码 ZIP](https://github.com/weichaoabc/agentcore-china-entra-id-samples/archive/refs/heads/main.zip)，或克隆仓库后进入示例目录：
+[下载完整代码 ZIP](https://github.com/aws-samples/sample-agentcore-china-entra-id/archive/refs/heads/main.zip)，或克隆仓库后进入示例目录：
 
 ```bash
-git clone https://github.com/weichaoabc/agentcore-china-entra-id-samples.git
-cd agentcore-china-entra-id-samples/samples/mcp-auth
+git clone https://github.com/aws-samples/sample-agentcore-china-entra-id.git
+cd sample-agentcore-china-entra-id/samples/mcp-auth
 ```
 
 ## 环境与配置

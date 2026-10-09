@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Employee-only client for the Runtime-hosted OBO tool; no private key needed."""
 import argparse
 import json

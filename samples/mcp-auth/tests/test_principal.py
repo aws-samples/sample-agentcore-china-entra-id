@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Trust must bind to a persistent principal in the same China account."""
 import unittest
 from unittest.mock import Mock

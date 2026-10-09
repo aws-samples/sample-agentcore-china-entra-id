@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Native Identity custom China OAuth provider and real M2M resource invocation.
 
 Requires an authorized Entra confidential client, application permission and a

@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """OAuth binding, parameter conversion and credential logging boundaries."""
 import base64
 from contextlib import redirect_stdout

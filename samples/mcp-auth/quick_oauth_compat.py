@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Narrow OAuth parameter adapter for Quick and an existing Entra China app.
 
 Quick's MCP resource URL maps to the existing API's GUID-qualified v2 scope.

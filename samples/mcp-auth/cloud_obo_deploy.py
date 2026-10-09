@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Deploy a separate, certificate-authenticated OBO MCP middle tier in China."""
 import argparse
 from datetime import datetime, timedelta, timezone

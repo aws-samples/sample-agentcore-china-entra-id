@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Call the IAM Gateway with the standard AWS credential chain."""
 import json
 import boto3

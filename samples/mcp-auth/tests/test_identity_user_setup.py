@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Check local secret handling without creating credentials or cloud resources."""
 import json
 from pathlib import Path

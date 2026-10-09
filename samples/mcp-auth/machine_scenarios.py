@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Run real machine authentication and shared MCP business scenarios.
 
 Credentials and access tokens stay in memory. Reports contain verified

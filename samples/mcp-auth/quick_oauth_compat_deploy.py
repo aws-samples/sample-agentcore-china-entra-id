@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Deploy a narrow OAuth parameter adapter without creating another Entra app."""
 import argparse
 from datetime import datetime, timezone

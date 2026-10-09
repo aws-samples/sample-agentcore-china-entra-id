@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Small MCP 2025-03-26 HTTP client with per-request IAM or bearer authentication."""
 import json
 from urllib.parse import urlparse

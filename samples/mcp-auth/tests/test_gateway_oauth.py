@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Regression checks for OAuth Gateway resource tracking and credential boundaries."""
 import json
 from pathlib import Path

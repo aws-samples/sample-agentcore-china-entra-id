@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Local security and integration contract checks; these do not prove cloud OAuth."""
 import copy
 import json

@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Portal rendering/URL regressions; no MSAL, JWT, MCP or cloud access required."""
 from html.parser import HTMLParser
 import importlib.util

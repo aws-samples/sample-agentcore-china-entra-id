@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Native AgentCore Identity user authorization; no OBO exchange in this path."""
 import json
 import os

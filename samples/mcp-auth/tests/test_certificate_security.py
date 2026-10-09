@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Exercise certificate assertions with real MSAL and an offline HTTP transport."""
 import base64
 import hashlib

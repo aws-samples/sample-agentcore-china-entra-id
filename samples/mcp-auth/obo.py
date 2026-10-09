@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Local Entra China OBO protocol check; Graph returns only the current user's ID.
 
 This co-locates the public test client and confidential middle tier on one

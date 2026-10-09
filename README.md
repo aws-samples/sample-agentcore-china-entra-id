@@ -11,3 +11,13 @@ Use the supplied application and Runtime implementations when you do not already
 The [portal walkthrough](practice/portal-walkthrough.zh-CN.md) compares the global managed portal with the China application and includes real console screenshots, employee steps, and a sanitized success-result example.
 
 [中文说明](README.zh-CN.md)
+
+第三方依赖说明见 [THIRD-PARTY-NOTICES](THIRD-PARTY-NOTICES.md)。
+
+## Security
+
+See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+
+## License
+
+This library is licensed under the MIT-0 License. See the LICENSE file.

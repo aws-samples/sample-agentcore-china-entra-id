@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """MCP tool that uses the verified inbound employee token to perform cloud OBO."""
 import anyio
 from mcp.server.mcpserver import Context, MCPServer

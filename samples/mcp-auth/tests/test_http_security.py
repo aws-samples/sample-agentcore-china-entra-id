@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """HTTP failures must not create sessions, expose bodies, or complete identity checks."""
 import json
 import unittest

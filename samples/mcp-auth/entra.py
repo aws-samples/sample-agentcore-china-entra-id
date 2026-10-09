@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Real Entra China login and app-only MCP calls; credentials stay in memory."""
 import argparse
 import base64

@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """HTTPS BFF: cookie-bound login, single-use Identity callback, asynchronous MCP."""
 import hashlib
 import hmac

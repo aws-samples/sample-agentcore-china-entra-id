@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Offline regression checks for the demo's permission and authentication boundaries."""
 
 import fnmatch

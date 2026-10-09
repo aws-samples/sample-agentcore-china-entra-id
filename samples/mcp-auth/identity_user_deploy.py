@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Deploy the native Identity sample as a separate China Runtime and HTTPS BFF."""
 import argparse
 from datetime import datetime, timezone

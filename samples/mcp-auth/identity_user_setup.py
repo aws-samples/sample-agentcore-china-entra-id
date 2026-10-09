@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Prepare the existing Entra app for native Identity user OAuth.
 
 Secret entry happens interactively on the deployment computer. This module

@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Parameterised deployment and evidence collection for the China MCP sample.
 
 Standard SDK credentials are the default. --credentials-csv is a local lab

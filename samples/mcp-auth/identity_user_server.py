@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """MCP entry for the native Identity user authorization web sample."""
 import anyio
 from mcp.server.mcpserver import Context, MCPServer

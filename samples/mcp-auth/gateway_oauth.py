@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Deploy and invoke a China Gateway with native OAuth M2M to the JWT MCP Runtime."""
 import argparse
 from datetime import datetime, timezone

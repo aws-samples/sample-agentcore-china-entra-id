@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 """Prepare local test credentials; upload only client-public.cer to Entra."""
 from datetime import datetime, timedelta, timezone
 import json
